@@ -30,3 +30,13 @@
 
 # Debug files
 *.dSYM/
+
+doxygen/
+
+build/
+
+visualc/
+
+yotta/
+
+programs/ssl/dtls*
