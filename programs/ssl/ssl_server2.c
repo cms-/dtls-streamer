@@ -41,8 +41,7 @@
 // buffer for dealing with max_len in DTLS
 #include "buffer.h"
 // file functions for assembling a test MJPG stream
-uint32_t file_read( const char *f_path, uint8_t **file_buf );
-//uint32_t stream_create( void *file_buf, fifo_p f );
+#include "file.h"
 
 #if !defined(MBEDTLS_ENTROPY_C) || \
     !defined(MBEDTLS_SSL_TLS_C) || !defined(MBEDTLS_SSL_SRV_C) || \
@@ -180,8 +179,6 @@ int main( void )
  * if you change this value to something outside the range <= 100 or > 500
  */
 #define IO_BUF_LEN      1030
-
-#define TEST_FILE       "test33.jpg"
 
 #if defined(MBEDTLS_X509_CRT_PARSE_C)
 #if defined(MBEDTLS_FS_IO)
@@ -859,44 +856,6 @@ static int ssl_sig_hashes_for_test[] = {
     int version_suites[4][2];
     unsigned char buf[IO_BUF_LEN];
 
-uint32_t file_read( const char *f_path, uint8_t **file_buf )
-{
-    uint32_t f_size;
-    FILE *f_handle;
-
-    if( ( f_handle = fopen( f_path, "rb" ) ) == NULL )
-        return( 0 );
-
-    fseek( f_handle, 0, SEEK_END );
-
-    if( ( f_size = ftell( f_handle ) ) == -1 )
-    {
-        fclose( f_handle );
-        return( 0 );
-    }
-    fseek( f_handle, 0, SEEK_SET );
-
-    if ( ( *file_buf = calloc ( f_size + 1, sizeof(uint8_t) ) ) == NULL )
-    {
-        fclose( f_handle );
-        return( 0 );
-    }
-    printf("\nFILE SIZE: %u\n\n", f_size);
-    if ( fread( *file_buf, sizeof(uint8_t), f_size, f_handle ) != f_size )
-    {
-        fclose( f_handle );
-        free( *file_buf );
-        return( 0 );
-    }
-
-    fclose( f_handle );
-    return f_size;
-}
-
-// uint32_t stream_create( void *file_buf, fifo_p f )
-// {
-
-// }
 
 int main( int argc, char *argv[] )
 {

@@ -1,5 +1,5 @@
 /**
- * \file buffer.h
+ * \buffer.h
  *
  * \buffer suite to test UDP streaming via a DTLS server
  *

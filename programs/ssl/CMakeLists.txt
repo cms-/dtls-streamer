@@ -3,6 +3,7 @@ find_package(Threads)
 
 set(libs
     mbedtls
+    output_dtls
 )
 
 set(targets

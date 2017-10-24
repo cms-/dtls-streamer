@@ -56,7 +56,6 @@ set(src_crypto
     version.c
     version_features.c
     xtea.c
-    buffer.c
 )
 
 set(src_x509
@@ -81,6 +80,11 @@ set(src_tls
     ssl_srv.c
     ssl_ticket.c
     ssl_tls.c
+)
+
+set(output_dtls
+    buffer.c
+    file.c
 )
 
 if(CMAKE_COMPILER_IS_GNUCC)
