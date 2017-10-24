@@ -1,8 +1,7 @@
 /**
  * \file buffer.h
  *
- * \non-circular fifo implementation to test UDP write chunking respecting DTLS 
- *  max_frag_len
+ * \buffer suite to test UDP streaming via a DTLS server
  *
  *  Released under MIT license by Chris Slothouber sol at hax space 
  *

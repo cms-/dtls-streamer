@@ -40,6 +40,9 @@
 
 // buffer for dealing with max_len in DTLS
 #include "buffer.h"
+// file functions for assembling a test MJPG stream
+uint32_t file_read( const char *f_path, uint8_t **file_buf );
+//uint32_t stream_create( void *file_buf, fifo_p f );
 
 #if !defined(MBEDTLS_ENTROPY_C) || \
     !defined(MBEDTLS_SSL_TLS_C) || !defined(MBEDTLS_SSL_SRV_C) || \
@@ -177,6 +180,8 @@ int main( void )
  * if you change this value to something outside the range <= 100 or > 500
  */
 #define IO_BUF_LEN      1030
+
+#define TEST_FILE       "test33.jpg"
 
 #if defined(MBEDTLS_X509_CRT_PARSE_C)
 #if defined(MBEDTLS_FS_IO)
@@ -854,6 +859,45 @@ static int ssl_sig_hashes_for_test[] = {
     int version_suites[4][2];
     unsigned char buf[IO_BUF_LEN];
 
+uint32_t file_read( const char *f_path, uint8_t **file_buf )
+{
+    uint32_t f_size;
+    FILE *f_handle;
+
+    if( ( f_handle = fopen( f_path, "rb" ) ) == NULL )
+        return( 0 );
+
+    fseek( f_handle, 0, SEEK_END );
+
+    if( ( f_size = ftell( f_handle ) ) == -1 )
+    {
+        fclose( f_handle );
+        return( 0 );
+    }
+    fseek( f_handle, 0, SEEK_SET );
+
+    if ( ( *file_buf = calloc ( f_size + 1, sizeof(uint8_t) ) ) == NULL )
+    {
+        fclose( f_handle );
+        return( 0 );
+    }
+    printf("\nFILE SIZE: %u\n\n", f_size);
+    if ( fread( *file_buf, sizeof(uint8_t), f_size, f_handle ) != f_size )
+    {
+        fclose( f_handle );
+        free( *file_buf );
+        return( 0 );
+    }
+
+    fclose( f_handle );
+    return f_size;
+}
+
+// uint32_t stream_create( void *file_buf, fifo_p f )
+// {
+
+// }
+
 int main( int argc, char *argv[] )
 {
 
@@ -921,19 +965,14 @@ int main( int argc, char *argv[] )
     const int *list;
 
     // fifo buffer testing
-    fifo_p mybuf = fifo_init();
-    uint32_t buf_ret;
+    fifo_p fifo_buf = fifo_init();
+    uint32_t fifo_ret;
+    uint32_t file_ret;
 
-    uint32_t f_size;
-    FILE *f_handle = fopen("test33.jpg", "rb");
-    fseek( f_handle, 0, SEEK_END );
-    f_size = ftell( f_handle );
-    rewind( f_handle );
-    printf("\nFILE SIZE: %u\n\n", f_size);
-    
-    uint8_t *f_buffer = calloc( f_size + 1, sizeof(uint8_t) );
-    fread( f_buffer, sizeof(int), f_size, f_handle );
-    fclose( f_handle );
+    uint8_t *file_buf;
+    file_ret = file_read( TEST_FILE, &file_buf );
+    printf("\n%u\n", file_ret );
+
 
 // #if defined(MBEDTLS_MEMORY_BUFFER_ALLOC_C)
 //     mbedtls_memory_buffer_alloc_init( alloc_buf, sizeof(alloc_buf) );
@@ -2403,8 +2442,8 @@ data_exchange:
     // len = sprintf( (char *) buf, HTTP_RESPONSE,
     //                mbedtls_ssl_get_ciphersuite( &ssl ) );
 
-    buf_ret = fifo_put( f_buffer, mybuf, f_size );
-    printf("%u\n", buf_ret);
+    fifo_ret = fifo_put( file_buf, fifo_buf, file_ret );
+    printf( "%u\n", fifo_ret );
 
     if( opt.transport == MBEDTLS_SSL_TRANSPORT_STREAM )
     {
@@ -2430,19 +2469,19 @@ data_exchange:
     }
     else /* Not stream, so datagram */
     {
-        //buf_ret = fifo_put( &buf, mybuf, len );
+        //fifo_ret = fifo_put( &buf, mybuf, len );
 
         frags = 0;
         written = 0;
 
-        while ( buf_ret != 0 )
+        while ( fifo_ret != 0 )
         {
             //len = sizeof( buf ) - 1;
             memset( buf, 0, sizeof( buf ) );
-            buf_ret = fifo_get( &buf, mybuf, 300 );
-            //printf("%u\n", buf_ret );
+            fifo_ret = fifo_get( &buf, fifo_buf, 300 );
+            printf("%u\n", fifo_ret );
             //printf("%s\n", buf );
-            do ret = mbedtls_ssl_write( &ssl, buf, buf_ret );
+            do ret = mbedtls_ssl_write( &ssl, buf, fifo_ret );
             while( ret == MBEDTLS_ERR_SSL_WANT_READ ||
                    ret == MBEDTLS_ERR_SSL_WANT_WRITE );
 
@@ -2453,7 +2492,7 @@ data_exchange:
             }
 
             frags++;
-            written += buf_ret;
+            written += fifo_ret;
         }
     }
 
@@ -2497,8 +2536,7 @@ exit:
 
     mbedtls_printf( "  . Cleaning up..." );
     fflush( stdout );
-    fifo_destroy( mybuf );
-    free( f_buffer );
+    fifo_destroy( fifo_buf );
     mbedtls_net_free( &client_fd );
     mbedtls_net_free( &listen_fd );
     
