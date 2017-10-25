@@ -926,11 +926,11 @@ int main( int argc, char *argv[] )
     // fifo buffer testing
     fifo_p fifo_buf = fifo_init();
     uint32_t fifo_ret;
-    uint32_t file_ret;
+    int32_t file_ret;
 
     uint8_t *file_buf;
     file_ret = file_read( TEST_FILE, &file_buf );
-    printf("\n%u\n", file_ret );
+    printf("\n%d\n", file_ret );
 
 
 // #if defined(MBEDTLS_MEMORY_BUFFER_ALLOC_C)
