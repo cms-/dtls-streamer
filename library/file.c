@@ -35,7 +35,7 @@ int32_t file_read( const char *f_path, uint8_t **file_buf )
     if ( fread( *file_buf, sizeof(uint8_t), f_size, f_handle ) != (uint32_t) f_size )
     {
         fclose( f_handle );
-        free( *file_buf );
+        free( file_buf );
         return( -4 );
     }
 

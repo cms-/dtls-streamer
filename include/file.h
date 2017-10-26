@@ -15,7 +15,9 @@
 #include <stdint.h>
 #include "buffer.h"
 
-#define TEST_FILE       "test33.jpg"
+#define TEST_FILE       "test"
+#define TEST_EXT		".jpg"
+#define NUM_FRAMES		2
 
 #define HTTP_HEAD \
 	"HTTP/1.0 200 OK\r\n" \

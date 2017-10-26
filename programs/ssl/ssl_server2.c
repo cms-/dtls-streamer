@@ -924,13 +924,12 @@ int main( int argc, char *argv[] )
     const int *list;
 
     // fifo buffer testing
-    fifo_p fifo_buf = fifo_init();
+    
     uint32_t fifo_ret;
     int32_t file_ret;
 
     uint8_t *file_buf;
-    file_ret = file_read( TEST_FILE, &file_buf );
-    printf("\n%d\n", file_ret );
+    
 
 
 // #if defined(MBEDTLS_MEMORY_BUFFER_ALLOC_C)
@@ -2401,10 +2400,6 @@ data_exchange:
     // len = sprintf( (char *) buf, HTTP_RESPONSE,
     //                mbedtls_ssl_get_ciphersuite( &ssl ) );
 
-    fifo_ret = stream_create( file_buf, fifo_buf, file_ret );
-    fifo_ret = fifo_stat( fifo_buf );
-    printf( "\n%u\n", fifo_ret );
-
     if( opt.transport == MBEDTLS_SSL_TRANSPORT_STREAM )
     {
         for( written = 0, frags = 0; written < len; written += ret, frags++ )
@@ -2430,29 +2425,67 @@ data_exchange:
     else /* Not stream, so datagram */
     {
         //fifo_ret = fifo_put( &buf, mybuf, len );
+        uint8_t file_count = 0;
+        char file_name[80];
+        char file_number[10];
+
 
         frags = 0;
         written = 0;
 
-        while ( fifo_ret != 0 )
+        while (1)
         {
-            //len = sizeof( buf ) - 1;
-            memset( buf, 0, sizeof( buf ) );
-            fifo_ret = fifo_get( &buf, fifo_buf, 300 );
-            printf("%u\n", fifo_ret );
-            //printf("%s\n", buf );
-            do ret = mbedtls_ssl_write( &ssl, buf, fifo_ret );
-            while( ret == MBEDTLS_ERR_SSL_WANT_READ ||
-                   ret == MBEDTLS_ERR_SSL_WANT_WRITE );
+            fifo_p fifo_buf = fifo_init();
 
-            if( ret < 0 )
+            strcat( file_name, (char *)TEST_FILE );
+            sprintf( file_number, "%d", file_count );
+            strcat( file_name, file_number );
+            strcat( file_name, (char *)TEST_EXT );
+
+            printf( "%s\n", file_name );
+            file_ret = file_read( file_name, &file_buf );
+            memset( file_name, 0, sizeof( file_name ) );
+            printf("\n%d\n", file_ret );
+
+            fifo_ret = stream_create( file_buf, fifo_buf, file_ret );
+            memset( file_buf, 0, file_ret + 1 );
+            fifo_ret = fifo_stat( fifo_buf );
+            printf( "\n%u\n", fifo_ret );
+
+
+
+            while ( fifo_ret != 0 )
             {
-                mbedtls_printf( " failed\n  ! mbedtls_ssl_write returned %d\n\n", ret );
-                goto reset;
+                //len = sizeof( buf ) - 1;
+                memset( buf, 0, sizeof( buf ) );
+                fifo_ret = fifo_get( &buf, fifo_buf, 300 );
+                printf("%u\n", fifo_ret );
+                //printf("%s\n", buf );
+                do ret = mbedtls_ssl_write( &ssl, buf, fifo_ret );
+                while( ret == MBEDTLS_ERR_SSL_WANT_READ ||
+                       ret == MBEDTLS_ERR_SSL_WANT_WRITE );
+
+                if( ret < 0 )
+                {
+                    mbedtls_printf( " failed\n  ! mbedtls_ssl_write returned %d\n\n", ret );
+                    goto reset;
+                }
+
+                frags++;
+                written += fifo_ret;
             }
 
-            frags++;
-            written += fifo_ret;
+            fifo_destroy( fifo_buf );
+
+            if ( file_count > NUM_FRAMES - 1 )
+            {
+                //file_count = 0;
+                break;
+            }
+            else
+            {
+                file_count++;
+            }
         }
     }
 
@@ -2496,7 +2529,6 @@ exit:
 
     mbedtls_printf( "  . Cleaning up..." );
     fflush( stdout );
-    fifo_destroy( fifo_buf );
     mbedtls_net_free( &client_fd );
     mbedtls_net_free( &listen_fd );
     
