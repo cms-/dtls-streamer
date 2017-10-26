@@ -57,17 +57,18 @@ uint32_t stream_create( void *file_buf, uint32_t f_len, fifo_p f )
     struct timeval timestamp;
     gettimeofday ( &timestamp, NULL );
 
-    // if fifo_p is empty:
-    //     len += sprintf(the header)
+    if ( ( fifo_stat( f ) ) == 0 )
+    {
+        len += sprint( (char *) buf, HTTP_HEAD );
+    }
 
-
-    // len += sprintf( print mimetype )
-    // (int) timestamp.tv_sec, (int) timestamp.tv_usec);
-
-    // fifo_put buf, len
-
-    // fifo_put file_buf, len
-
-    return ret;
+    len += sprintf( (char *) buf, HTTP_STITCH, (int) f_len,
+                (int) timestamp.tv_sec, (int) timestamp.tv_usec);
+    
+    ret = fifo_put( buf, len );
+    printf("\nRet put buf: %u\n", ret);
+    fifo_put( file_buf, f_len );
+    printf("\nRet put f_buf%u\n", ret);
+    return (0);
 
 }

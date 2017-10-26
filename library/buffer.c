@@ -96,3 +96,11 @@ void fifo_destroy( fifo_p f )
     printf("\nFreed fifo buffer.\n");
 }
 
+// ******* fifo_stat *******
+// Returns the number of elements in the buffer.
+// Inputs: an active fifo_p pointer.
+// Ouputs: zero on empty, otherwise number of elements in buffer
+void fifo_stat( fifo_p f )
+{
+    return f->putPt;
+}

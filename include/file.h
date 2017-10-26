@@ -26,7 +26,7 @@
 	"--" BOUNDARY "\r\n"
 
 #define STD_HEADER "Connection: close\r\n" \
-    "Server: MJPG-Streamer/0.2\r\n" \
+    "Server: DTLS-streamer/0.1\r\n" \
     "Cache-Control: no-store, no-cache, must-revalidate, pre-check=0, post-check=0, max-age=0\r\n" \
     "Pragma: no-cache\r\n" \
     "Expires: Mon, 3 Jan 2000 12:34:56 GMT\r\n"
