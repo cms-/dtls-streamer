@@ -49,7 +49,7 @@ int32_t file_read( const char *f_path, uint8_t **file_buf )
 // Inputs: a file buffer loaded with JPEG data; length of the JPEG data;
 //         and an initialized fifo_p pointer.
 // Ouputs: non-zero on error.
-uint32_t stream_create( void *file_buf, uint32_t f_len, fifo_p f )
+uint32_t stream_create( void *file_buf, fifo_p f, uint32_t file_len )
 {
     uint32_t ret = 0;
     uint32_t len = 0;
@@ -57,18 +57,18 @@ uint32_t stream_create( void *file_buf, uint32_t f_len, fifo_p f )
     struct timeval timestamp;
     gettimeofday ( &timestamp, NULL );
 
-    if ( ( fifo_stat( f ) ) == 0 )
-    {
-        len += sprint( (char *) buf, HTTP_HEAD );
-    }
+    // if ( ( fifo_stat( f ) ) == 0 )
+    // {
+    //     len += sprint( (char *) buf, HTTP_HEAD );
+    // }
 
-    len += sprintf( (char *) buf, HTTP_STITCH, (int) f_len,
+    len += sprintf( (char *) buf, HTTP_STITCH, (int) file_len,
                 (int) timestamp.tv_sec, (int) timestamp.tv_usec);
     
-    ret = fifo_put( buf, len );
-    printf("\nRet put buf: %u\n", ret);
-    fifo_put( file_buf, f_len );
-    printf("\nRet put f_buf%u\n", ret);
+    ret = fifo_put( buf, f, len );
+    printf("\nstream_create ret; put func_buf: %u\n", ret);
+    ret = fifo_put( file_buf, f, file_len );
+    printf("\nstream_create ret; put file_buf: %u\n", ret);
     return (0);
 
 }

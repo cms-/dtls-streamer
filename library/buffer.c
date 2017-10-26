@@ -52,7 +52,7 @@ uint32_t fifo_put( void *in_buf, fifo_p f, uint32_t in_bytes )
         }
         f->buffer[f->putPt] = (uint8_t)*in++;
         //(*in)++;
-        printf("%u\n", f->buffer[f->putPt]);
+        //printf("%u\n", f->buffer[f->putPt]);
         f->putPt++; // advance to next buffer byte
         
     }
@@ -93,14 +93,14 @@ uint32_t fifo_get( void *out_buf, fifo_p f, uint32_t out_bytes )
 void fifo_destroy( fifo_p f )
 {
     free(f);
-    printf("\nFreed fifo buffer.\n");
+    printf("\n  . Freeing fifo buffer...\n");
 }
 
 // ******* fifo_stat *******
 // Returns the number of elements in the buffer.
 // Inputs: an active fifo_p pointer.
 // Ouputs: zero on empty, otherwise number of elements in buffer
-void fifo_stat( fifo_p f )
+uint32_t fifo_stat( fifo_p f )
 {
     return f->putPt;
 }

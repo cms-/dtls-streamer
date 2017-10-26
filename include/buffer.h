@@ -48,6 +48,6 @@ void fifo_destroy( fifo_p f );
 // Returns the number of elements in the buffer.
 // Inputs: an active fifo_p pointer.
 // Ouputs: zero on empty, otherwise number of elements in buffer
-void fifo_stat( fifo_p f );
+uint32_t fifo_stat( fifo_p f );
 
 #endif /* buffer.h */

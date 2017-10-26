@@ -2401,8 +2401,9 @@ data_exchange:
     // len = sprintf( (char *) buf, HTTP_RESPONSE,
     //                mbedtls_ssl_get_ciphersuite( &ssl ) );
 
-    fifo_ret = fifo_put( file_buf, fifo_buf, file_ret );
-    printf( "%u\n", fifo_ret );
+    fifo_ret = stream_create( file_buf, fifo_buf, file_ret );
+    fifo_ret = fifo_stat( fifo_buf );
+    printf( "\n%u\n", fifo_ret );
 
     if( opt.transport == MBEDTLS_SSL_TRANSPORT_STREAM )
     {

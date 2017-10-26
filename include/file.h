@@ -21,9 +21,9 @@
 	"HTTP/1.0 200 OK\r\n" \
 	"Access-Control-Allow-Origin: *\r\n" \
 	STD_HEADER \
-	"Content-Type: multipart/x-mixed-replace;boundary=" BOUNDARY "\r\n" \
-	"\r\n" \
-	"--" BOUNDARY "\r\n"
+	"Content-Type: multipart/x-mixed-replace;boundary=" \
+	BOUNDARY \
+	"\r\n\r\n"
 
 #define STD_HEADER "Connection: close\r\n" \
     "Server: DTLS-streamer/0.1\r\n" \
@@ -32,6 +32,8 @@
     "Expires: Mon, 3 Jan 2000 12:34:56 GMT\r\n"
 
 #define HTTP_STITCH \
+    "--" \
+    HTTP_BOUNDARY \
 	"Content-Type: image/jpeg\r\n" \
 	"Content-Length: %u\r\n" \
 	"X-Timestamp: %d.%06d\r\n" \
@@ -51,6 +53,6 @@ int32_t file_read( const char *f_path, uint8_t **file_buf );
 // Inputs: a file buffer loaded with JPEG data; length of the JPEG data;
 //         and an initialized fifo_p pointer.
 // Ouputs: non-zero on error.
-uint32_t stream_create( void *file_buf, uint32_t f_len, fifo_p f );
+uint32_t stream_create( void *file_buf, fifo_p f, uint32_t f_len );
 
 #endif /* file.h */
