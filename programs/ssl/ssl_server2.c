@@ -927,6 +927,7 @@ int main( int argc, char *argv[] )
     
     uint32_t fifo_ret;
     int32_t file_ret;
+    uint32_t stream_ret;
 
     uint8_t *file_buf;
     
@@ -2446,8 +2447,16 @@ data_exchange:
             file_ret = file_read( file_name, &file_buf );
             memset( file_name, 0, sizeof( file_name ) );
             printf("\n%d\n", file_ret );
-
-            fifo_ret = stream_create( file_buf, fifo_buf, file_ret );
+            mbedtls_printf( "  . Create stream frame %d", file_count );
+            fflush( stdout );
+            stream_ret = stream_create( file_buf, fifo_buf, file_ret );
+            if ( stream_ret > 0 )
+            {
+                mbedtls_printf( " failed\n  ! stream_create returned %d\n\n", stream_ret);
+                if ( fifo_buf )
+                        fifo_destroy( fifo_buf );
+                goto reset;
+            }
             memset( file_buf, 0, file_ret + 1 );
             fifo_ret = fifo_stat( fifo_buf );
             printf( "\n%u\n", fifo_ret );
@@ -2468,6 +2477,8 @@ data_exchange:
                 if( ret < 0 )
                 {
                     mbedtls_printf( " failed\n  ! mbedtls_ssl_write returned %d\n\n", ret );
+                    if ( fifo_buf )
+                        fifo_destroy( fifo_buf );
                     goto reset;
                 }
 

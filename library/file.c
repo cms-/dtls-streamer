@@ -54,21 +54,33 @@ uint32_t stream_create( void *file_buf, fifo_p f, uint32_t file_len )
     uint32_t ret = 0;
     uint32_t len = 0;
     uint8_t buf[BUFFERSIZE] = {0};
+    uint8_t eof[4] = "\r\n";
     struct timeval timestamp;
     gettimeofday ( &timestamp, NULL );
 
-    // if ( ( fifo_stat( f ) ) == 0 )
-    // {
-    //     len += sprint( (char *) buf, HTTP_HEAD );
-    // }
-
-    len += sprintf( (char *) buf, HTTP_STITCH, (int) file_len,
+    len = sprintf( (char *) buf, HTTP_STITCH, (int) file_len,
                 (int) timestamp.tv_sec, (int) timestamp.tv_usec);
-    
+
     ret = fifo_put( buf, f, len );
+    if (ret != len)
+    {
+        return (1);
+    }
     printf("\nstream_create ret; put func_buf: %u\n", ret);
+
     ret = fifo_put( file_buf, f, file_len );
+    if (ret != file_len)
+    {
+        return (2);
+    }
     printf("\nstream_create ret; put file_buf: %u\n", ret);
+
+    ret = fifo_put( eof, f, 2 );
+    if (ret != 2)
+    {
+        return (3);
+    }
+    printf("\nstream_create ret; put eof: %u\n", ret);
     return (0);
 
 }

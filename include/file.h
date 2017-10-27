@@ -17,7 +17,7 @@
 
 #define TEST_FILE       "test"
 #define TEST_EXT		".jpg"
-#define NUM_FRAMES		2
+#define NUM_FRAMES		9
 
 #define HTTP_HEAD \
 	"HTTP/1.0 200 OK\r\n" \
