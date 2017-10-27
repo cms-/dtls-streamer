@@ -40,7 +40,7 @@ int32_t file_read( const char *f_path, uint8_t **file_buf )
     }
 
     fclose( f_handle );
-    return f_size;
+    return( f_size );
 }
 
 // ******* stream_create *******
@@ -59,28 +59,29 @@ uint32_t stream_create( void *file_buf, fifo_p f, uint32_t file_len )
     gettimeofday ( &timestamp, NULL );
 
     len = sprintf( (char *) buf, HTTP_STITCH, (int) file_len,
-                (int) timestamp.tv_sec, (int) timestamp.tv_usec);
+                (int) timestamp.tv_sec, (int) timestamp.tv_usec );
 
     ret = fifo_put( buf, f, len );
     if (ret != len)
     {
-        return (1);
+        return ( 1 );
     }
-    printf("\nstream_create ret; put func_buf: %u\n", ret);
+    printf( "\nstream_create ret; put func_buf: %u\n", ret );
 
     ret = fifo_put( file_buf, f, file_len );
-    if (ret != file_len)
+    if ( ret != file_len )
     {
-        return (2);
+        return ( 2 );
     }
-    printf("\nstream_create ret; put file_buf: %u\n", ret);
+    printf( "\nstream_create ret; put file_buf: %u\n", ret );
 
     ret = fifo_put( eof, f, 2 );
-    if (ret != 2)
+    if ( ret != 2 )
     {
-        return (3);
+        return ( 3 );
     }
-    printf("\nstream_create ret; put eof: %u\n", ret);
-    return (0);
+    printf( "\nstream_create ret; put eof: %u\n", ret );
+
+    return ( 0 );
 
 }

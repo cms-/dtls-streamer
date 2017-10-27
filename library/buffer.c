@@ -19,17 +19,17 @@ fifo_p fifo_init( void )
 {
     fifo_p f;
 
-    f = (fifo_p) calloc( 1, sizeof(fifo_t) + 4 );
+    f = ( fifo_p ) calloc( 1, sizeof(fifo_t) + 4 );
 
-    if (f == NULL)
+    if ( f == NULL )
     {
         printf( "  ! buffer memory allocation failed\n" );
-        exit(1);
+        exit( 1 );
     }
 
     f->putPt = 0;
     f->getPt = 0;
-    return f;
+    return( f );
 }
 
 // ******* fifo_put *******
@@ -42,13 +42,13 @@ uint32_t fifo_put( void *in_buf, fifo_p f, uint32_t in_bytes )
     char *in;
     in = in_buf;
 
-    for (bytes=0; bytes < in_bytes; bytes++)
+    for ( bytes=0; bytes < in_bytes; bytes++ )
     {
         // Check to see if there's space in the buffer
         // Full condition: counter reached BUFFERSIZE
-        if (f->putPt == BUFFERSIZE)
+        if ( f->putPt == BUFFERSIZE )
         {
-            return bytes; // no room left, return number of bytes inserted
+            return( bytes ); // no room left, return number of bytes inserted
         }
         f->buffer[f->putPt] = (uint8_t)*in++;
         //(*in)++;
@@ -56,7 +56,7 @@ uint32_t fifo_put( void *in_buf, fifo_p f, uint32_t in_bytes )
         f->putPt++; // advance to next buffer byte
         
     }
-    return bytes; // return number of bytes added to the buffer
+    return( bytes ); // return number of bytes added to the buffer
 }
 
 // ******* fifo_get *******
@@ -73,7 +73,7 @@ uint32_t fifo_get( void *out_buf, fifo_p f, uint32_t out_bytes )
         // Ensure we're not at the empty condition: f->putPt == f->getPt
         if ( f->putPt == f->getPt )
         {
-            return bytes;
+            return( bytes );
         }
         else
         {
@@ -83,7 +83,7 @@ uint32_t fifo_get( void *out_buf, fifo_p f, uint32_t out_bytes )
         }
 
     }
-    return bytes;
+    return( bytes );
 }
 
 // ******* fifo_destroy *******
@@ -92,8 +92,8 @@ uint32_t fifo_get( void *out_buf, fifo_p f, uint32_t out_bytes )
 // Ouputs: none
 void fifo_destroy( fifo_p f )
 {
-    free(f);
-    printf("\n  . Freeing fifo buffer...\n");
+    free( f );
+    printf( "\n  . Freeing fifo buffer...\n" );
 }
 
 // ******* fifo_stat *******
