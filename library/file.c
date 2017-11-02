@@ -43,6 +43,15 @@ int32_t file_read( const char *f_path, uint8_t **file_buf )
     return( f_size );
 }
 
+// ******* fifo_free *******
+// Releases memory assigned to a file buffer.
+// Inputs: a pointer to a file buffer pointer
+// Ouputs: none
+void file_free( uint8_t **file_buf )
+{
+    free( *file_buf );
+}
+
 // ******* stream_create *******
 // Assembles a continuous stream of JPEG frames connected with HTTP
 // interstitial boundary information.
@@ -52,35 +61,35 @@ int32_t file_read( const char *f_path, uint8_t **file_buf )
 uint32_t stream_create( void *file_buf, fifo_p f, uint32_t file_len )
 {
     uint32_t ret = 0;
-    uint32_t len = 0;
-    uint8_t buf[BUFFERSIZE] = {0};
-    uint8_t eof[4] = "\r\n";
+    // uint32_t len = 0;
+    // uint8_t buf[BUFFERSIZE] = {0};
+    // uint8_t eof[4] = "\r\n";
     struct timeval timestamp;
     gettimeofday ( &timestamp, NULL );
 
-    len = sprintf( (char *) buf, HTTP_STITCH, (int) file_len,
-                (int) timestamp.tv_sec, (int) timestamp.tv_usec );
+    // len = sprintf( (char *) buf, HTTP_STITCH, (int) file_len,
+    //             (int) timestamp.tv_sec, (int) timestamp.tv_usec );
 
-    ret = fifo_put( buf, f, len );
-    if (ret != len)
-    {
-        return ( 1 );
-    }
-    printf( "\nstream_create ret; put func_buf: %u\n", ret );
+    // ret = fifo_put( buf, f, len );
+    // if (ret != len)
+    // {
+    //     return ( 1 );
+    // }
+    // printf( "\nstream_create ret; put func_buf: %u\n", ret );
 
     ret = fifo_put( file_buf, f, file_len );
     if ( ret != file_len )
     {
         return ( 2 );
     }
-    printf( "\nstream_create ret; put file_buf: %u\n", ret );
+    //printf( "\nstream_create ret; put file_buf: %u\n", ret );
 
-    ret = fifo_put( eof, f, 2 );
-    if ( ret != 2 )
-    {
-        return ( 3 );
-    }
-    printf( "\nstream_create ret; put eof: %u\n", ret );
+    // ret = fifo_put( eof, f, 2 );
+    // if ( ret != 2 )
+    // {
+    //     return ( 3 );
+    // }
+    // printf( "\nstream_create ret; put eof: %u\n", ret );
 
     return ( 0 );
 

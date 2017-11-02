@@ -49,6 +49,12 @@
 // Ouputs: length of file loaded or negative error code.
 int32_t file_read( const char *f_path, uint8_t **file_buf );
 
+// ******* fifo_free *******
+// Releases memory assigned to a file buffer.
+// Inputs: a pointer to a file buffer pointer
+// Ouputs: none
+void file_free( uint8_t **file_buf );
+
 // ******* stream_create *******
 // Assembles a continuous stream of JPEG frames connected with HTTP
 // interstitial boundary information.
