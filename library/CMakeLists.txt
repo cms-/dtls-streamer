@@ -85,6 +85,7 @@ set(src_tls
 set(src_output_dtls
     buffer.c
     file.c
+    packet.pb-c.c
 )
 
 if(CMAKE_COMPILER_IS_GNUCC)
@@ -142,7 +143,7 @@ if(USE_STATIC_MBEDTLS_LIBRARY)
 
     add_library(${output_dtls_static_target} STATIC ${src_output_dtls})
     set_target_properties(${output_dtls_static_target} PROPERTIES OUTPUT_NAME output_dtls)
-    target_link_libraries(${output_dtls_static_target} ${libs})
+    target_link_libraries(${output_dtls_static_target} ${libs}  /usr/local/lib/libprotobuf-c.a)
 
     install(TARGETS ${mbedtls_static_target} ${mbedx509_static_target} ${mbedcrypto_static_target} ${output_dtls_static_target}
             DESTINATION ${LIB_INSTALL_DIR}
@@ -156,7 +157,7 @@ if(USE_SHARED_MBEDTLS_LIBRARY)
 
     add_library(output_dtls SHARED ${src_output_dtls})
     set_target_properties(output_dtls PROPERTIES VERSION 0.0.1 SOVERSION 0)
-    target_link_libraries(output_dtls ${libs})
+    target_link_libraries(output_dtls ${libs} /usr/local/lib/libprotobuf-c.a)
 
     add_library(mbedx509 SHARED ${src_x509})
     set_target_properties(mbedx509 PROPERTIES VERSION 2.6.0 SOVERSION 0)

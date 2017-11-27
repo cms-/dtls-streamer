@@ -38,8 +38,11 @@
 #define mbedtls_printf     printf
 #endif
 
-// buffer for dealing with max_len in DTLS
+// buffer providing packet framing over udp
 #include "buffer.h"
+// protobuf-c packet definition
+#include "packet.pb-c.h"
+#include <protobuf-c/protobuf-c.h>
 // file functions for assembling a test MJPG stream
 #include "file.h"
 
@@ -2398,8 +2401,8 @@ data_exchange:
 
     //printf("%u\n", buf_ret);
 
-    // len = sprintf( (char *) buf, HTTP_RESPONSE,
-    //                mbedtls_ssl_get_ciphersuite( &ssl ) );
+     len = sprintf( (char *) buf, HTTP_RESPONSE,
+                    mbedtls_ssl_get_ciphersuite( &ssl ) );
 
     if( opt.transport == MBEDTLS_SSL_TRANSPORT_STREAM )
     {
@@ -2426,9 +2429,15 @@ data_exchange:
     else /* Not stream, so datagram */
     {
         //fifo_ret = fifo_put( &buf, mybuf, len );
-        uint8_t file_count = 0;
+        uint8_t file_count = 99;
         char file_name[80];
         char file_number[10];
+        uint32_t countr = 0;
+
+        void *pbuf;
+        uint32_t plen;
+
+        Packet packet = PACKET__INIT;
 
 
         frags = 0;
@@ -2443,13 +2452,14 @@ data_exchange:
             strcat( file_name, file_number );
             strcat( file_name, (char *)TEST_EXT );
 
-            //printf( "%s\n", file_name );
+
             file_ret = file_read( file_name, &file_buf );
             memset( file_name, 0, sizeof( file_name ) );
-            //printf("\n%d\n", file_ret );
-            //mbedtls_printf( "  . Create stream frame %d", file_count );
+            printf("%u\n", file_ret);
+            mbedtls_printf( "  . Create stream frame %d", file_count );
             fflush( stdout );
             stream_ret = stream_create( file_buf, fifo_buf, file_ret );
+            
             if ( stream_ret > 0 )
             {
                 mbedtls_printf( " failed\n  ! stream_create returned %d\n\n", stream_ret);
@@ -2458,20 +2468,20 @@ data_exchange:
                     file_free( &file_buf );
                 goto reset;
             }
-            
-            memset( file_buf, 0, file_ret + 1 );
             file_free( &file_buf );
+            //memset( file_buf, 0, file_ret + 1 );
             fifo_ret = fifo_stat( fifo_buf );
-            //printf( "\n%u\n", fifo_ret );
-
-
+            printf("\n FIFO Returns: %u\n", fifo_ret);
 
             while ( fifo_ret != 0 )
             {
                 //len = sizeof( buf ) - 1;
                 memset( buf, 0, sizeof( buf ) );
-                fifo_ret = fifo_get( &buf, fifo_buf, 300 );
-                //printf("%u\n", fifo_ret );
+                fifo_ret = fifo_get( &buf, fifo_buf, 15 );
+                //packet.body.data = buf;
+                memcpy(packet.body.data, buf, fifo_ret);
+                plen = packet__get_packed_size(&packet);
+                printf("\nplen: %u\n", plen);
                 //printf("%s\n", buf );
                 do ret = mbedtls_ssl_write( &ssl, buf, fifo_ret );
                 while( ret == MBEDTLS_ERR_SSL_WANT_READ ||
@@ -2487,19 +2497,24 @@ data_exchange:
 
                 frags++;
                 written += fifo_ret;
+                break;
             }
-
+            memset( buf, 0, sizeof( buf ) );
             fifo_destroy( fifo_buf );
+            //printf("%d\n", countr);
+            countr++;
 
-            if ( file_count > NUM_FRAMES - 1 )
-            {
-                file_count = 0;
-                //break;
-            }
-            else
-            {
-                file_count++;
-            }
+            // if ( file_count > NUM_FRAMES - 1 )
+            // {
+            //     file_count = 0;
+            //     //break;
+            // }
+            // else
+            // {
+            //     file_count++;
+            // }
+            break;
+
         }
     }
 
