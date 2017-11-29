@@ -44,23 +44,30 @@
 #define HTTP_BOUNDARY	"boundarydonotcross\r\n"
 
 // ******* file_read *******
-// Initializes a FIFO structure, preparing it for usage.
-// Inputs: a path string and an unallocated file buffer.
-// Ouputs: length of file loaded or negative error code.
+// Reads binary data from a fully qualified file path.
+// Inputs: a file path string and an unallocated file buffer.
+// Outputs: length of file loaded or negative error code.
 int32_t file_read( const char *f_path, uint8_t **file_buf );
 
 // ******* fifo_free *******
 // Releases memory assigned to a file buffer.
 // Inputs: a pointer to a file buffer pointer
-// Ouputs: none
+// Outputs: none
 void file_free( uint8_t **file_buf );
 
 // ******* stream_create *******
-// Assembles a continuous stream of JPEG frames connected with HTTP
-// interstitial boundary information.
-// Inputs: a file buffer loaded with JPEG data; length of the JPEG data;
+// Reads a JPEG from file into a FIFO buffer in order to simulate a 
+// video capture device.
+// Inputs: a file buffer loaded with JPEG data, length of the JPEG data,
 //         and an initialized fifo_p pointer.
-// Ouputs: non-zero on error.
-uint32_t stream_create( void *file_buf, fifo_p f, uint32_t f_len );
+// Outputs: non-zero on error.
+uint32_t frame_create( void *file_buf, uint32_t file_len, fifo_p f );
+
+// ******* packet_create *******
+// Assembles a serialized packet using supplied fifo and packet length.
+// Inputs: an empty initialized packet buffer, an initialized fifo_p 
+// pointer, and the number of bytes to load from the fifo.
+// Outputs: Length of loaded *packet_buf, < 0 on error.
+int32_t packet_create( void *p_buf, fifo_p f, uint32_t payload_len );
 
 #endif /* file.h */

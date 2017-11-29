@@ -55,10 +55,34 @@ void   packet__free_unpacked
 static const ProtobufCFieldDescriptor packet__field_descriptors[4] =
 {
   {
-    "uuid",
+    "crc",
     1,
     PROTOBUF_C_LABEL_REQUIRED,
     PROTOBUF_C_TYPE_SFIXED32,
+    0,   /* quantifier_offset */
+    offsetof(Packet, crc),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "seq",
+    2,
+    PROTOBUF_C_LABEL_REQUIRED,
+    PROTOBUF_C_TYPE_SFIXED32,
+    0,   /* quantifier_offset */
+    offsetof(Packet, seq),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
+  {
+    "uuid",
+    3,
+    PROTOBUF_C_LABEL_REQUIRED,
+    PROTOBUF_C_TYPE_SFIXED64,
     0,   /* quantifier_offset */
     offsetof(Packet, uuid),
     NULL,
@@ -67,36 +91,12 @@ static const ProtobufCFieldDescriptor packet__field_descriptors[4] =
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
   {
-    "seq_id",
-    2,
-    PROTOBUF_C_LABEL_OPTIONAL,
-    PROTOBUF_C_TYPE_SFIXED32,
-    offsetof(Packet, has_seq_id),
-    offsetof(Packet, seq_id),
-    NULL,
-    NULL,
-    0,             /* flags */
-    0,NULL,NULL    /* reserved1,reserved2, etc */
-  },
-  {
-    "crc",
-    3,
-    PROTOBUF_C_LABEL_OPTIONAL,
-    PROTOBUF_C_TYPE_SFIXED32,
-    offsetof(Packet, has_crc),
-    offsetof(Packet, crc),
-    NULL,
-    NULL,
-    0,             /* flags */
-    0,NULL,NULL    /* reserved1,reserved2, etc */
-  },
-  {
-    "body",
+    "payload",
     4,
-    PROTOBUF_C_LABEL_OPTIONAL,
+    PROTOBUF_C_LABEL_REQUIRED,
     PROTOBUF_C_TYPE_BYTES,
-    offsetof(Packet, has_body),
-    offsetof(Packet, body),
+    0,   /* quantifier_offset */
+    offsetof(Packet, payload),
     NULL,
     NULL,
     0,             /* flags */
@@ -104,10 +104,10 @@ static const ProtobufCFieldDescriptor packet__field_descriptors[4] =
   },
 };
 static const unsigned packet__field_indices_by_name[] = {
-  3,   /* field[3] = body */
-  2,   /* field[2] = crc */
-  1,   /* field[1] = seq_id */
-  0,   /* field[0] = uuid */
+  0,   /* field[0] = crc */
+  3,   /* field[3] = payload */
+  1,   /* field[1] = seq */
+  2,   /* field[2] = uuid */
 };
 static const ProtobufCIntRange packet__number_ranges[1 + 1] =
 {

@@ -14,7 +14,7 @@ typedef struct fifo_t {
 // ******* fifo_init *******
 // Initializes a FIFO structure, preparing it for usage.
 // Inputs: none
-// Ouputs: an initialized fifo_p pointer
+// Outputs: an initialized fifo_p pointer
 fifo_p fifo_init( void )
 {
     fifo_p f;
@@ -87,7 +87,7 @@ uint32_t fifo_get( void *out_buf, fifo_p f, uint32_t out_bytes )
 // ******* fifo_destroy *******
 // Releases memory assigned to a FIFO structure, freeing it for further use.
 // Inputs: an active fifo_p pointer
-// Ouputs: none
+// Outputs: none
 void fifo_destroy( fifo_p f )
 {
     free( f );
@@ -97,7 +97,7 @@ void fifo_destroy( fifo_p f )
 // ******* fifo_stat *******
 // Returns the number of elements in the buffer.
 // Inputs: an active fifo_p pointer.
-// Ouputs: zero on empty, otherwise number of elements in buffer
+// Outputs: zero on empty, otherwise number of elements in buffer
 uint32_t fifo_stat( fifo_p f )
 {
     return f->putPt;

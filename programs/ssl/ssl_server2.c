@@ -43,6 +43,7 @@
 // protobuf-c packet definition
 #include "packet.pb-c.h"
 #include <protobuf-c/protobuf-c.h>
+
 // file functions for assembling a test MJPG stream
 #include "file.h"
 
@@ -930,7 +931,7 @@ int main( int argc, char *argv[] )
     
     uint32_t fifo_ret;
     int32_t file_ret;
-    uint32_t stream_ret;
+    uint32_t frame_ret;
 
     uint8_t *file_buf;
     
@@ -2434,8 +2435,8 @@ data_exchange:
         char file_number[10];
         uint32_t countr = 0;
 
-        void *pbuf;
-        uint32_t plen;
+        uint8_t packet_buf[512];
+        uint32_t packet_len;
 
         Packet packet = PACKET__INIT;
 
@@ -2446,7 +2447,8 @@ data_exchange:
         while (1)
         {
             fifo_p fifo_buf = fifo_init();
-
+            // assemble a series of JPEG filenames in order to simulate
+            // a video capture device.
             strcat( file_name, (char *)TEST_FILE );
             sprintf( file_number, "%d", file_count );
             strcat( file_name, file_number );
@@ -2454,15 +2456,23 @@ data_exchange:
 
 
             file_ret = file_read( file_name, &file_buf );
+            if ( file_ret < 0 )
+            {
+                mbedtls_printf( " failed\n  ! file_read returned %d\n\n", file_ret);
+                if ( fifo_buf )
+                    fifo_destroy( fifo_buf );
+                    file_free( &file_buf );
+                goto reset;
+            }
             memset( file_name, 0, sizeof( file_name ) );
             printf("%u\n", file_ret);
             mbedtls_printf( "  . Create stream frame %d", file_count );
             fflush( stdout );
-            stream_ret = stream_create( file_buf, fifo_buf, file_ret );
+            frame_ret = frame_create( file_buf, file_ret, fifo_buf );
             
-            if ( stream_ret > 0 )
+            if ( frame_ret > 0 )
             {
-                mbedtls_printf( " failed\n  ! stream_create returned %d\n\n", stream_ret);
+                mbedtls_printf( " failed\n  ! frame_create returned %d\n\n", frame_ret);
                 if ( fifo_buf )
                     fifo_destroy( fifo_buf );
                     file_free( &file_buf );
@@ -2475,15 +2485,12 @@ data_exchange:
 
             while ( fifo_ret != 0 )
             {
-                //len = sizeof( buf ) - 1;
+                // Keep sending packets until the current FIFO is exhausted
                 memset( buf, 0, sizeof( buf ) );
-                fifo_ret = fifo_get( &buf, fifo_buf, 15 );
-                //packet.body.data = buf;
-                memcpy(packet.body.data, buf, fifo_ret);
-                plen = packet__get_packed_size(&packet);
-                printf("\nplen: %u\n", plen);
-                //printf("%s\n", buf );
-                do ret = mbedtls_ssl_write( &ssl, buf, fifo_ret );
+                fifo_ret = fifo_get( &buf, fifo_buf, 300 );
+                
+                packet_len = packet_create( packet_buf, fifo_buf, fifo_ret );
+                do ret = mbedtls_ssl_write( &ssl, packet_buf, packet_len );
                 while( ret == MBEDTLS_ERR_SSL_WANT_READ ||
                        ret == MBEDTLS_ERR_SSL_WANT_WRITE );
 

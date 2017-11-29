@@ -26,17 +26,14 @@ typedef struct _Packet Packet;
 struct  _Packet
 {
   ProtobufCMessage base;
-  int32_t uuid;
-  protobuf_c_boolean has_seq_id;
-  int32_t seq_id;
-  protobuf_c_boolean has_crc;
+  ProtobufCBinaryData payload;
+  int64_t uuid;
+  int32_t seq;
   int32_t crc;
-  protobuf_c_boolean has_body;
-  ProtobufCBinaryData body;
 };
 #define PACKET__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&packet__descriptor) \
-    , 0, 0, 0, 0, 0, 0, {0,NULL} }
+    , {0,NULL}, 0, 0, 0 }
 
 
 /* Packet methods */
