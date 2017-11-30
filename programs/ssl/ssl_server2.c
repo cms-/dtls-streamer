@@ -2434,8 +2434,8 @@ data_exchange:
         char file_name[80];
         char file_number[10];
         uint32_t countr = 0;
-
-        uint8_t packet_buf[512];
+        uint8_t *packet_buf;
+        
         uint32_t packet_len;
 
         Packet packet = PACKET__INIT;
@@ -2488,9 +2488,10 @@ data_exchange:
             while ( fifo_ret != 0 )
             {
                 // Keep sending packets until the current FIFO is exhausted
-                memset( buf, 0, sizeof( buf ) );
-                
-                packet_len = packet_create( packet_buf, fifo_buf, fifo_ret );
+                packet_buf = (uint8_t *) calloc( 512, sizeof( uint8_t ) );
+                packet_len = packet_create( packet_buf, &packet, fifo_buf, 300 );
+                printf( "packet_len: %u\n", packet_len );
+
                 do ret = mbedtls_ssl_write( &ssl, packet_buf, packet_len );
                 while( ret == MBEDTLS_ERR_SSL_WANT_READ ||
                        ret == MBEDTLS_ERR_SSL_WANT_WRITE );
@@ -2500,13 +2501,16 @@ data_exchange:
                     mbedtls_printf( " failed\n  ! mbedtls_ssl_write returned %d\n\n", ret );
                     if ( fifo_buf )
                         fifo_destroy( fifo_buf );
+                    free( packet_buf );
                     goto reset;
                 }
 
                 frags++;
-                written += fifo_ret;
+                written += packet_len;
+                free( packet_buf );
                 fifo_ret = fifo_stat( fifo_buf );
                 //sequence++;
+                
                 break;
             }
             memset( buf, 0, sizeof( buf ) );

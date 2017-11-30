@@ -14,6 +14,9 @@
 #include <string.h>
 #include <stdint.h>
 #include "buffer.h"
+// protobuf-c packet definition
+#include "packet.pb-c.h"
+#include <protobuf-c/protobuf-c.h>
 
 #define TEST_FILE       "test"
 #define TEST_EXT		".jpg"
@@ -68,6 +71,6 @@ uint32_t frame_create( void *file_buf, uint32_t file_len, fifo_p f );
 // Inputs: an empty initialized packet buffer, an initialized fifo_p 
 // pointer, and the number of bytes to load from the fifo.
 // Outputs: Length of loaded *packet_buf, < 0 on error.
-int32_t packet_create( void *p_buf, fifo_p f, uint32_t payload_len );
+int32_t packet_create( void *p_buf, Packet *p, fifo_p f, uint32_t payload_len );
 
 #endif /* file.h */
