@@ -2482,12 +2482,13 @@ data_exchange:
             //memset( file_buf, 0, file_ret + 1 );
             fifo_ret = fifo_stat( fifo_buf );
             printf("\n FIFO Returns: %u\n", fifo_ret);
-
+            // Set UUID for this image
+            //uuid = uuid();
+            //sequence = 0;
             while ( fifo_ret != 0 )
             {
                 // Keep sending packets until the current FIFO is exhausted
                 memset( buf, 0, sizeof( buf ) );
-                fifo_ret = fifo_get( &buf, fifo_buf, 300 );
                 
                 packet_len = packet_create( packet_buf, fifo_buf, fifo_ret );
                 do ret = mbedtls_ssl_write( &ssl, packet_buf, packet_len );
@@ -2504,6 +2505,8 @@ data_exchange:
 
                 frags++;
                 written += fifo_ret;
+                fifo_ret = fifo_stat( fifo_buf );
+                //sequence++;
                 break;
             }
             memset( buf, 0, sizeof( buf ) );

@@ -99,9 +99,28 @@ uint32_t frame_create( void *file_buf, uint32_t file_len, fifo_p f )
 // Inputs: an empty initialized packet buffer, an initialized fifo_p 
 // pointer, and the number of bytes to load from the fifo.
 // Outputs: Length of loaded *packet_buf, < 0 on error.
-int32_t packet_create( void *p_buf, fifo_p f, uint32_t payload_len )
+int32_t packet_create( void *p_buf, fifo_p f, uint32_t payload )
 {
+    uint64_t uuid = 0;
+    uint32_t seq = 0;
+    uint32_t crc = 0;
 
-    return ( 0 );
+    buf = (uint8_t *) calloc( payload_len, uint8_t );
+    uint32_t fifo_ret;
+    uint32_t p_buf_ret;
+
+    fifo_ret = fifo_get( buf, f, payload_len );
+    //crc = crc32( buf, fifo_ret );
+    packet.payload.len = fifo_ret;
+    packet.payload.data = &buf[0];
+
+    packet.uuid = uuid;
+    packet.seq = seq;
+    packet.crc = crc;
+
+    p_buf_ret = packet__pack( &packet, p_buf );
+
+    free ( buf );
+    return ( p_buf_ret );
 
 }
