@@ -95,31 +95,31 @@ uint32_t frame_create( void *file_buf, uint32_t file_len, fifo_p f )
 }
 
 // ******* packet_create *******
-// Assembles a serialized packet using supplied fifo and packet length.
-// Inputs: an empty initialized packet buffer, an initialized fifo_p 
-// pointer, and the number of bytes to load from the fifo.
+// Assembles & writes a serialized packet using supplied fifo and per-packet metadata.
+// Inputs: an empty & allocated buffer, a protobuf-c packet, an initialized fifo_p 
+// pointer, the desired packet payload length, a uuid for the current frame/file, the 
+// packet sequence of the current frame/file, and the number of packets per frame/file.
 // Outputs: Length of loaded *packet_buf, < 0 on error.
-int32_t packet_create( void *p_buf, Packet *p, fifo_p f, uint32_t payload_len )
+int32_t packet_create( void *p_buf, Packet *p, fifo_p f, uint32_t payload_len,
+                        uint64_t uuid, uint32_t seq, uint32_t len )
 {
-    uint64_t uuid = 0;
-    uint32_t seq = 0;
     uint32_t crc = 0;
     uint32_t fifo_ret;
     uint32_t p_buf_ret;
     uint8_t *buf;
-    buf = (uint8_t *) calloc( payload_len, sizeof( uint8_t ) );
+    buf = (uint8_t *) calloc( payload_len, sizeof(uint8_t) );
     
-
     fifo_ret = fifo_get( buf, f, payload_len );
     //crc = crc32( buf, fifo_ret );
     p->payload.len = fifo_ret;
     p->payload.data = &buf[0];
 
     p->uuid = uuid;
+    p->len = len;
     p->seq = seq;
     p->crc = crc;
 
-    p_buf_ret = protobuf_c_message_pack( p, p_buf );
+    p_buf_ret = protobuf_c_message_pack( (const struct ProtobufCMessage *) p, p_buf );
 
     free ( buf );
     return ( p_buf_ret );

@@ -43,6 +43,8 @@
 // protobuf-c packet definition
 #include "packet.pb-c.h"
 #include <protobuf-c/protobuf-c.h>
+// Packet payload size in bytes
+#define PAYLOAD_SIZE        400
 
 // file functions for assembling a test MJPG stream
 #include "file.h"
@@ -2435,7 +2437,7 @@ data_exchange:
         char file_number[10];
         uint32_t countr = 0;
         uint8_t *packet_buf;
-        
+        uint32_t sequence;
         uint32_t packet_len;
 
         Packet packet = PACKET__INIT;
@@ -2484,13 +2486,14 @@ data_exchange:
             printf("\n FIFO Returns: %u\n", fifo_ret);
             // Set UUID for this image
             //uuid = uuid();
-            //sequence = 0;
+            sequence = 0;
             while ( fifo_ret != 0 )
             {
                 // Keep sending packets until the current FIFO is exhausted
                 packet_buf = (uint8_t *) calloc( 512, sizeof( uint8_t ) );
-                packet_len = packet_create( packet_buf, &packet, fifo_buf, 300 );
+                packet_len = packet_create( packet_buf, &packet, fifo_buf, 300, 0, sequence, 0 );
                 printf( "packet_len: %u\n", packet_len );
+                
 
                 do ret = mbedtls_ssl_write( &ssl, packet_buf, packet_len );
                 while( ret == MBEDTLS_ERR_SSL_WANT_READ ||
@@ -2509,11 +2512,10 @@ data_exchange:
                 written += packet_len;
                 free( packet_buf );
                 fifo_ret = fifo_stat( fifo_buf );
-                //sequence++;
-                
-                break;
+                printf("%u\n", fifo_ret);
+                sequence++;
             }
-            memset( buf, 0, sizeof( buf ) );
+
             fifo_destroy( fifo_buf );
             //printf("%d\n", countr);
             countr++;
@@ -2533,7 +2535,7 @@ data_exchange:
     }
 
     //buf[written] = '\0';
-    mbedtls_printf( " %d bytes written in %d fragments\n\n%s\n", written, frags, (char *) buf );
+    mbedtls_printf( " %d bytes written in %d fragments\n\n", written, frags );
     ret = 0;
 
     /*

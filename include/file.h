@@ -67,10 +67,12 @@ void file_free( uint8_t **file_buf );
 uint32_t frame_create( void *file_buf, uint32_t file_len, fifo_p f );
 
 // ******* packet_create *******
-// Assembles a serialized packet using supplied fifo and packet length.
-// Inputs: an empty initialized packet buffer, an initialized fifo_p 
-// pointer, and the number of bytes to load from the fifo.
+// Assembles & writes a serialized packet using supplied fifo and per-packet metadata.
+// Inputs: an empty & allocated buffer, a protobuf-c packet, an initialized fifo_p 
+// pointer, the desired packet payload length, a uuid for the current frame/file, and 
+// the packet sequence of the current frame/file.
 // Outputs: Length of loaded *packet_buf, < 0 on error.
-int32_t packet_create( void *p_buf, Packet *p, fifo_p f, uint32_t payload_len );
+int32_t packet_create( void *p_buf, Packet *p, fifo_p f, uint32_t payload_len,
+                        uint64_t uuid, uint32_t seq, uint32_t len );
 
 #endif /* file.h */

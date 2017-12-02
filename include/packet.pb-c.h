@@ -27,13 +27,14 @@ struct  _Packet
 {
   ProtobufCMessage base;
   ProtobufCBinaryData payload;
+  int32_t len;
   int64_t uuid;
   int32_t seq;
   int32_t crc;
 };
 #define PACKET__INIT \
  { PROTOBUF_C_MESSAGE_INIT (&packet__descriptor) \
-    , {0,NULL}, 0, 0, 0 }
+    , {0,NULL}, 0, 0, 0, 0 }
 
 
 /* Packet methods */

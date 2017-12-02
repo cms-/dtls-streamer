@@ -52,15 +52,15 @@ void   packet__free_unpacked
   assert(message->base.descriptor == &packet__descriptor);
   protobuf_c_message_free_unpacked ((ProtobufCMessage*)message, allocator);
 }
-static const ProtobufCFieldDescriptor packet__field_descriptors[4] =
+static const ProtobufCFieldDescriptor packet__field_descriptors[5] =
 {
   {
-    "crc",
+    "uuid",
     1,
     PROTOBUF_C_LABEL_REQUIRED,
-    PROTOBUF_C_TYPE_SFIXED32,
+    PROTOBUF_C_TYPE_SFIXED64,
     0,   /* quantifier_offset */
-    offsetof(Packet, crc),
+    offsetof(Packet, uuid),
     NULL,
     NULL,
     0,             /* flags */
@@ -79,12 +79,12 @@ static const ProtobufCFieldDescriptor packet__field_descriptors[4] =
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
   {
-    "uuid",
+    "len",
     3,
     PROTOBUF_C_LABEL_REQUIRED,
-    PROTOBUF_C_TYPE_SFIXED64,
+    PROTOBUF_C_TYPE_SFIXED32,
     0,   /* quantifier_offset */
-    offsetof(Packet, uuid),
+    offsetof(Packet, len),
     NULL,
     NULL,
     0,             /* flags */
@@ -102,17 +102,30 @@ static const ProtobufCFieldDescriptor packet__field_descriptors[4] =
     0,             /* flags */
     0,NULL,NULL    /* reserved1,reserved2, etc */
   },
+  {
+    "crc",
+    5,
+    PROTOBUF_C_LABEL_REQUIRED,
+    PROTOBUF_C_TYPE_SFIXED32,
+    0,   /* quantifier_offset */
+    offsetof(Packet, crc),
+    NULL,
+    NULL,
+    0,             /* flags */
+    0,NULL,NULL    /* reserved1,reserved2, etc */
+  },
 };
 static const unsigned packet__field_indices_by_name[] = {
-  0,   /* field[0] = crc */
+  4,   /* field[4] = crc */
+  2,   /* field[2] = len */
   3,   /* field[3] = payload */
   1,   /* field[1] = seq */
-  2,   /* field[2] = uuid */
+  0,   /* field[0] = uuid */
 };
 static const ProtobufCIntRange packet__number_ranges[1 + 1] =
 {
   { 1, 0 },
-  { 0, 4 }
+  { 0, 5 }
 };
 const ProtobufCMessageDescriptor packet__descriptor =
 {
@@ -122,7 +135,7 @@ const ProtobufCMessageDescriptor packet__descriptor =
   "Packet",
   "",
   sizeof(Packet),
-  4,
+  5,
   packet__field_descriptors,
   packet__field_indices_by_name,
   1,  packet__number_ranges,

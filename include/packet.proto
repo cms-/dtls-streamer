@@ -1,7 +1,8 @@
 message Packet 
 {
 	required bytes payload=4;
-	required sfixed64 uuid=3;
+	required sfixed32 len=3;
+	required sfixed64 uuid=1;
 	required sfixed32 seq=2;
-	required sfixed32 crc=1;
+	required sfixed32 crc=5;
 }

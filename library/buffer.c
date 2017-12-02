@@ -54,6 +54,7 @@ uint32_t fifo_put( void *in_buf, fifo_p f, uint32_t in_bytes )
         f->putPt++; // advance to next buffer byte
         
     }
+
     return( bytes ); // return number of bytes added to the buffer
 }
 
@@ -81,6 +82,7 @@ uint32_t fifo_get( void *out_buf, fifo_p f, uint32_t out_bytes )
         }
 
     }
+
     return( bytes );
 }
 
@@ -100,5 +102,6 @@ void fifo_destroy( fifo_p f )
 // Outputs: zero on empty, otherwise number of elements in buffer
 uint32_t fifo_stat( fifo_p f )
 {
-    return f->putPt;
+
+    return ( f->putPt - f->getPt );
 }
