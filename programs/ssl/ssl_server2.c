@@ -28,8 +28,7 @@
 #if defined(MBEDTLS_PLATFORM_C)
 #include "mbedtls/platform.h"
 #else
-#include <stdio.h>
-#include <stdlib.h>
+
 #define mbedtls_free       free
 #define mbedtls_time       time
 #define mbedtls_time_t     time_t
@@ -37,14 +36,16 @@
 #define mbedtls_fprintf    fprintf
 #define mbedtls_printf     printf
 #endif
-
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/time.h>
 // buffer providing packet framing over udp
 #include "buffer.h"
 // protobuf-c packet definition
 #include "packet.pb-c.h"
 #include <protobuf-c/protobuf-c.h>
 // Packet payload size in bytes
-#define PAYLOAD_SIZE        400
+#define PAYLOAD_SIZE        420
 
 // file functions for assembling a test MJPG stream
 #include "file.h"
@@ -858,7 +859,9 @@ static int ssl_sig_hashes_for_test[] = {
 #endif /* MBEDTLS_X509_CRT_PARSE_C */
 
 
-    int ret = 0, len, written, frags, exchanges_left;
+    int ret = 0, len, written, frags, exchanges_left, speed, seconds;
+    struct timeval timestart;
+    struct timeval timeend;
     int version_suites[4][2];
     unsigned char buf[IO_BUF_LEN];
 
@@ -2432,20 +2435,30 @@ data_exchange:
     else /* Not stream, so datagram */
     {
         //fifo_ret = fifo_put( &buf, mybuf, len );
+
+
+        
+
         uint8_t file_count = 99;
         char file_name[80];
         char file_number[10];
         uint32_t countr = 0;
-        uint8_t *packet_buf;
-        uint32_t sequence;
-        uint32_t packet_len;
+        uint8_t *p_buf;
+        uint32_t seq;
+        uint32_t p_len;
+        uint32_t p_totlen;
+        uint32_t uuid = 123456781;
+        
+
+        int c, d;
 
         Packet packet = PACKET__INIT;
 
 
         frags = 0;
         written = 0;
-
+        
+        gettimeofday ( &timestart, NULL );
         while (1)
         {
             fifo_p fifo_buf = fifo_init();
@@ -2463,6 +2476,7 @@ data_exchange:
                 mbedtls_printf( " failed\n  ! file_read returned %d\n\n", file_ret);
                 if ( fifo_buf )
                     fifo_destroy( fifo_buf );
+                if ( file_buf )
                     file_free( &file_buf );
                 goto reset;
             }
@@ -2477,6 +2491,7 @@ data_exchange:
                 mbedtls_printf( " failed\n  ! frame_create returned %d\n\n", frame_ret);
                 if ( fifo_buf )
                     fifo_destroy( fifo_buf );
+                if ( file_buf )
                     file_free( &file_buf );
                 goto reset;
             }
@@ -2486,56 +2501,78 @@ data_exchange:
             printf("\n FIFO Returns: %u\n", fifo_ret);
             // Set UUID for this image
             //uuid = uuid();
-            sequence = 0;
+            uuid++;
+            printf("UUID: %u\n", uuid);
+            seq = 0;
+            p_totlen = ( fifo_ret / PAYLOAD_SIZE );
+            if ( fifo_ret % PAYLOAD_SIZE  != 0 )
+            {
+                p_totlen++;
+            }
+
+            
             while ( fifo_ret != 0 )
             {
                 // Keep sending packets until the current FIFO is exhausted
-                packet_buf = (uint8_t *) calloc( 512, sizeof( uint8_t ) );
-                packet_len = packet_create( packet_buf, &packet, fifo_buf, 300, 0, sequence, 0 );
-                printf( "packet_len: %u\n", packet_len );
+                p_buf = (uint8_t *) calloc( 512, sizeof( uint8_t ) );
+                p_len = packet_create( p_buf, &packet, fifo_buf, PAYLOAD_SIZE, uuid, seq, p_totlen );
+                printf( "packet_len: %u\n", p_len );
                 
 
-                do ret = mbedtls_ssl_write( &ssl, packet_buf, packet_len );
+                do ret = mbedtls_ssl_write( &ssl, p_buf, p_len );
                 while( ret == MBEDTLS_ERR_SSL_WANT_READ ||
                        ret == MBEDTLS_ERR_SSL_WANT_WRITE );
 
                 if( ret < 0 )
                 {
                     mbedtls_printf( " failed\n  ! mbedtls_ssl_write returned %d\n\n", ret );
-                    if ( fifo_buf )
-                        fifo_destroy( fifo_buf );
-                    free( packet_buf );
+                if ( fifo_buf )
+                    fifo_destroy( fifo_buf );
+                if ( file_buf )
+                    file_free( &file_buf );
+
+                    free( p_buf );
                     goto reset;
                 }
 
                 frags++;
-                written += packet_len;
-                free( packet_buf );
+                written += p_len;
+                free( p_buf );
                 fifo_ret = fifo_stat( fifo_buf );
                 printf("%u\n", fifo_ret);
-                sequence++;
+                seq++;
             }
 
             fifo_destroy( fifo_buf );
-            //printf("%d\n", countr);
             countr++;
+            printf( "p_totlen: %u\n", p_totlen );
+            fflush( stdout );
+            
+            for ( c = 1 ; c <= 700 ; c++ )
+                for ( d = 1 ; d <= 700 ; d++ )
+                {}
 
-            // if ( file_count > NUM_FRAMES - 1 )
-            // {
-            //     file_count = 0;
-            //     //break;
-            // }
+            if ( countr > 800 )
+            {
+                //file_count = 0;
+                printf("%d\n", countr);
+                gettimeofday ( &timeend, NULL );
+                break;
+            }
             // else
             // {
             //     file_count++;
             // }
-            break;
+            
 
         }
     }
 
     //buf[written] = '\0';
-    mbedtls_printf( " %d bytes written in %d fragments\n\n", written, frags );
+    seconds = timeend.tv_sec - timestart.tv_sec;
+    mbedtls_printf( " %d bytes in %d seconds, written in %d fragments\n\n", written, seconds, frags );
+    speed = written / seconds;
+    mbedtls_printf( " %u bytes per second\n\n", speed);
     ret = 0;
 
     /*
