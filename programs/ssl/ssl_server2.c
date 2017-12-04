@@ -859,7 +859,7 @@ static int ssl_sig_hashes_for_test[] = {
 #endif /* MBEDTLS_X509_CRT_PARSE_C */
 
 
-    int ret = 0, len, written, frags, exchanges_left, speed, seconds;
+    int ret = 0, len, written, frags, exchanges_left, speed, seconds, countr, fps;
     struct timeval timestart;
     struct timeval timeend;
     int version_suites[4][2];
@@ -2434,29 +2434,24 @@ data_exchange:
     }
     else /* Not stream, so datagram */
     {
-        //fifo_ret = fifo_put( &buf, mybuf, len );
 
-
-        
-
-        uint8_t file_count = 99;
+        uint8_t file_count = 0;
         char file_name[80];
         char file_number[10];
-        uint32_t countr = 0;
+
         uint8_t *p_buf;
         uint32_t seq;
         uint32_t p_len;
         uint32_t p_totlen;
         uint32_t uuid = 123456781;
         
-
         int c, d;
 
         Packet packet = PACKET__INIT;
 
-
         frags = 0;
         written = 0;
+        countr = 0;
         
         gettimeofday ( &timestart, NULL );
         while (1)
@@ -2495,8 +2490,9 @@ data_exchange:
                     file_free( &file_buf );
                 goto reset;
             }
-            file_free( &file_buf );
-            //memset( file_buf, 0, file_ret + 1 );
+            if ( file_buf )
+                file_free( &file_buf );
+
             fifo_ret = fifo_stat( fifo_buf );
             printf("\n FIFO Returns: %u\n", fifo_ret);
             // Set UUID for this image
@@ -2504,6 +2500,7 @@ data_exchange:
             uuid++;
             printf("UUID: %u\n", uuid);
             seq = 0;
+            countr++;
             p_totlen = ( fifo_ret / PAYLOAD_SIZE );
             if ( fifo_ret % PAYLOAD_SIZE  != 0 )
             {
@@ -2513,6 +2510,7 @@ data_exchange:
             
             while ( fifo_ret != 0 )
             {
+
                 // Keep sending packets until the current FIFO is exhausted
                 p_buf = (uint8_t *) calloc( 512, sizeof( uint8_t ) );
                 p_len = packet_create( p_buf, &packet, fifo_buf, PAYLOAD_SIZE, uuid, seq, p_totlen );
@@ -2544,25 +2542,28 @@ data_exchange:
             }
 
             fifo_destroy( fifo_buf );
-            countr++;
+            
             printf( "p_totlen: %u\n", p_totlen );
             fflush( stdout );
             
-            for ( c = 1 ; c <= 700 ; c++ )
-                for ( d = 1 ; d <= 700 ; d++ )
+            for ( c = 1 ; c <= 2400 ; c++ )
+                for ( d = 1 ; d <= 2400 ; d++ )
                 {}
 
-            if ( countr > 800 )
+            if ( countr == 50000 )
             {
-                //file_count = 0;
-                printf("%d\n", countr);
                 gettimeofday ( &timeend, NULL );
                 break;
             }
-            // else
-            // {
-            //     file_count++;
-            // }
+
+            if ( file_count == NUM_FRAMES )
+            {
+                file_count = 0;
+            }
+            else
+            {
+                file_count++;
+            }
             
 
         }
@@ -2570,9 +2571,14 @@ data_exchange:
 
     //buf[written] = '\0';
     seconds = timeend.tv_sec - timestart.tv_sec;
-    mbedtls_printf( " %d bytes in %d seconds, written in %d fragments\n\n", written, seconds, frags );
-    speed = written / seconds;
-    mbedtls_printf( " %u bytes per second\n\n", speed);
+    mbedtls_printf( " %d files comprising %d bytes in %d seconds, written in %d fragments\n", countr, written, seconds, frags );
+    if ( seconds > 0 )
+    {
+        speed = written / seconds;
+        mbedtls_printf( " %u bytes per second\n", speed);
+        fps = countr / seconds;
+        mbedtls_printf( " %u frames per second\n\n", fps);
+    }
     ret = 0;
 
     /*

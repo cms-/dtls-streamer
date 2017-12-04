@@ -64,8 +64,8 @@ uint32_t frame_create( void *file_buf, uint32_t file_len, fifo_p f )
     // uint32_t len = 0;
     // uint8_t buf[BUFFERSIZE] = {0};
     // uint8_t eof[4] = "\r\n";
-    struct timeval timestamp;
-    gettimeofday ( &timestamp, NULL );
+    // struct timeval timestamp;
+    // gettimeofday ( &timestamp, NULL );
 
     // len = sprintf( (char *) buf, HTTP_STITCH, (int) file_len,
     //             (int) timestamp.tv_sec, (int) timestamp.tv_usec );
