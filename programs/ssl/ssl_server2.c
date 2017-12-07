@@ -859,7 +859,9 @@ static int ssl_sig_hashes_for_test[] = {
 #endif /* MBEDTLS_X509_CRT_PARSE_C */
 
 
-    int ret = 0, len, written, frags, exchanges_left, speed, seconds, countr, fps;
+    int ret = 0, exchanges_left, countr;
+    uint32_t len;
+    uint64_t written, frags, speed, seconds, fps;
     struct timeval timestart;
     struct timeval timeend;
     int version_suites[4][2];
@@ -2571,13 +2573,13 @@ data_exchange:
 
     //buf[written] = '\0';
     seconds = timeend.tv_sec - timestart.tv_sec;
-    mbedtls_printf( " %d files comprising %d bytes in %d seconds, written in %d fragments\n", countr, written, seconds, frags );
+    mbedtls_printf( " %d files comprising %lli bytes in %lli seconds, written in %lli fragments\n", countr, written, seconds, frags );
     if ( seconds > 0 )
     {
         speed = written / seconds;
-        mbedtls_printf( " %u bytes per second\n", speed);
+        mbedtls_printf( " %lli bytes per second\n", speed);
         fps = countr / seconds;
-        mbedtls_printf( " %u frames per second\n\n", fps);
+        mbedtls_printf( " %lli frames per second\n\n", fps);
     }
     ret = 0;
 
