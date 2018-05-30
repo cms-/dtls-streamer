@@ -1,5 +1,15 @@
-README for mbed TLS
-===================
+# dtls-streamer
+Based on mbed TLS and Google protocol buffers
+
+Proof-of-concept for lightweight and secure streaming over UDP
+
+#### Packet data structure
+
+![data structure diagram](https://yuml.me/diagram/plain/class/[packet%7Cuuid;seq;len;payload])
+
+---
+
+## README for mbed TLS
 
 Configuration
 -------------
