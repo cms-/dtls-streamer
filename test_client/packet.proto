@@ -1,0 +1,7 @@
+message Packet 
+{
+	required bytes payload=4;
+	required sfixed32 len=3;
+	required sfixed64 uuid=1;
+	required sfixed32 seq=2;
+}
