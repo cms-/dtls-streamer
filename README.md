@@ -1,7 +1,7 @@
 # dtls-streamer
 Based on mbed TLS and Google protocol buffers
 
-Proof-of-concept for lightweight and secure streaming over UDP
+Proof-of-concept for lightweight and secure streaming over UDP. Streams a series of JPEG frames over UDP to a remote Python client. Tested across different network transport types and VLANs to test reliability of my UDP reassembly algorithm.
 
 #### Packet data structure
 
